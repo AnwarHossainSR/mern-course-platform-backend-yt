@@ -2,7 +2,7 @@ import cloudinary from 'cloudinary';
 import { catchAsyncError } from '../middlewares/catchAsyncError.js';
 import { Course } from '../models/Course.js';
 import { Stats } from '../models/Stats.js';
-import { uploader } from '../utils/cloudinaryConfig.js';
+import { destroy, uploader } from '../utils/cloudinaryConfig.js';
 import getDataUri from '../utils/dataUri.js';
 import ErrorHandler from '../utils/errorHandler.js';
 
@@ -82,7 +82,7 @@ export const addLecture = catchAsyncError(async (req, res, next) => {
   const file = req.file;
   const fileUri = getDataUri(file);
 
-  const mycloud = await cloudinary.v2.uploader.upload(fileUri.content, {
+  const response = await cloudinary.v2.uploader.upload(fileUri.content, {
     resource_type: 'video',
   });
 
@@ -90,8 +90,8 @@ export const addLecture = catchAsyncError(async (req, res, next) => {
     title,
     description,
     video: {
-      public_id: mycloud.public_id,
-      url: mycloud.secure_url,
+      public_id: response.public_id,
+      url: response.secure_url,
     },
   });
 
@@ -112,7 +112,7 @@ export const deleteCourse = catchAsyncError(async (req, res, next) => {
 
   if (!course) return next(new ErrorHandler('Course not found', 404));
 
-  await cloudinary.v2.uploader.destroy(course.poster.public_id);
+  await destroy(course.poster.public_id);
 
   for (let i = 0; i < course.lectures.length; i++) {
     const singleLecture = course.lectures[i];
