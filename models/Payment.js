@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema({
   razorpay_signature: {
@@ -20,4 +20,4 @@ const schema = new mongoose.Schema({
   },
 });
 
-export const Payment = mongoose.model("Payment", schema);
+export const Payment = mongoose.model('Payment', schema);
