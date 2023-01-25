@@ -158,10 +158,12 @@ export const deleteLecture = catchAsyncError(async (req, res, next) => {
 
 Course.watch().on('change', async () => {
   const stats = await Stats.find({}).sort({ createdAt: 'desc' }).limit(1);
+  console.log(stats);
 
   const courses = await Course.find({});
 
   let totalViews = 0;
+  console.log(courses.length);
 
   for (let i = 0; i < courses.length; i++) {
     totalViews += courses[i].views;
