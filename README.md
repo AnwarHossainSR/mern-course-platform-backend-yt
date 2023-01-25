@@ -13,7 +13,7 @@ _Below is an example of how you can instruct your audience on installing and set
 1. Clone the repo
 
    ```sh
-   git clone https://github.com/AnwarHossainSR/mern-ecommerce-yt-backend.git
+   git clone https://github.com/AnwarHossainSR/mern-course-platform-backend-yt.git
    ```
 
 2. Navigate to project folder
