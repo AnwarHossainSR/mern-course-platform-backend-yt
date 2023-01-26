@@ -36,7 +36,7 @@ export const createCourse = catchAsyncError(async (req, res, next) => {
 
   const fileUri = getDataUri(file);
 
-  const response = await uploader(fileUri.content, 'course');
+  const response = await uploader(fileUri.content, 'course_app/course');
 
   await Course.create({
     title,
