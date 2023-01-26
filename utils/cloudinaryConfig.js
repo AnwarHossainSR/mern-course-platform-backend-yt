@@ -10,7 +10,7 @@ export const cloudinaryConfig = () => {
 
 export const uploader = async (path, folder) => {
   return await cloudinary.v2.uploader.upload(path, {
-    folder: `course_app/${folder}`,
+    folder: folder,
   });
 };
 

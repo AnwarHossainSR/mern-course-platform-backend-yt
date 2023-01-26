@@ -118,11 +118,11 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
 
 export const updateprofilepicture = catchAsyncError(async (req, res, next) => {
   const file = req.file;
-
+console.log(file);
   const user = await User.findById(req.user._id);
 
   const fileUri = getDataUri(file);
-  const response = await uploader(fileUri.content, 'avatars');
+  const response = await uploader(fileUri.content, 'course_app/avatars');
 
   await destroy(user.avatar.public_id);
 
