@@ -2,7 +2,7 @@ import cloudinary from 'cloudinary';
 import crypto from 'crypto';
 import { catchAsyncError } from '../middlewares/catchAsyncError.js';
 import { Course } from '../models/Course.js';
-//import { Stats } from '../models/Stats.js';
+import { Stats } from '../models/Stats.js';
 import { User } from '../models/User.js';
 import { destroy, uploader } from '../utils/cloudinaryConfig.js';
 import getDataUri from '../utils/dataUri.js';
@@ -285,8 +285,6 @@ export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
 
   await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 
-  // Cancel Subscription
-
   await user.remove();
 
   res
@@ -300,13 +298,20 @@ export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
     });
 });
 
-// User.watch().on('change', async () => {
-//   const stats = await Stats.find({}).sort({ createdAt: 'desc' }).limit(1);
+User.watch().on('change', async () => {
+  const stats = await Stats.find({}).sort({ createdAt: 'desc' }).limit(1);
 
-//   const subscription = await User.find({ 'subscription.status': 'active' });
-//   stats[0].users = await User.countDocuments();
-//   stats[0].subscription = subscription.length;
-//   stats[0].createdAt = new Date(Date.now());
+  if (stats.length === 0)
+    return await Stats.create({
+      users: 0,
+      subscription: 0,
+      createdAt: new Date(Date.now()),
+    });
 
-//   await stats[0].save();
-// });
+  const subscription = await User.find({ 'subscription.status': 'active' });
+  stats[0].users = await User.countDocuments();
+  stats[0].subscription = subscription.length;
+  stats[0].createdAt = new Date(Date.now());
+
+  await stats[0].save();
+});
