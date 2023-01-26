@@ -35,20 +35,22 @@ router.route('/me').get(isAuthenticated, getMyProfile);
 
 router.route('/me').delete(isAuthenticated, deleteMyProfile);
 
-router.route('/changepassword').put(isAuthenticated, changePassword);
+router.route('/change-password').put(isAuthenticated, changePassword);
 
-router.route('/updateprofile').put(isAuthenticated, updateProfile);
+router.route('/update-profile').put(isAuthenticated, updateProfile);
 
 router
-  .route('/updateprofilepicture')
+  .route('/update-profile-picture')
   .put(isAuthenticated, singleUpload, updateprofilepicture);
 
-router.route('/forgetpassword').post(forgetPassword);
+router.route('/forget-password').post(forgetPassword);
 router.route('/resetpassword/:token').put(resetPassword);
 
-router.route('/addtoplaylist').post(isAuthenticated, addToPlaylist);
+router.route('/add-to-playlist').post(isAuthenticated, addToPlaylist);
 
-router.route('/removefromplaylist').delete(isAuthenticated, removeFromPlaylist);
+router
+  .route('/remove-from-playlist')
+  .delete(isAuthenticated, removeFromPlaylist);
 
 router.route('/admin/users').get(isAuthenticated, authorizeAdmin, getAllUsers);
 

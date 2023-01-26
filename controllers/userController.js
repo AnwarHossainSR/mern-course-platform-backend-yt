@@ -2,7 +2,7 @@ import cloudinary from 'cloudinary';
 import crypto from 'crypto';
 import { catchAsyncError } from '../middlewares/catchAsyncError.js';
 import { Course } from '../models/Course.js';
-//import { Stats } from '../models/Stats.js';
+import { Stats } from '../models/Stats.js';
 import { User } from '../models/User.js';
 import { destroy, uploader } from '../utils/cloudinaryConfig.js';
 import getDataUri from '../utils/dataUri.js';
@@ -12,25 +12,25 @@ import { sendToken } from '../utils/sendToken.js';
 
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
-  const file = req.file;
+  //const file = req.file;
 
-  if (!name || !email || !password || !file)
+  if (!name || !email || !password)
     return next(new ErrorHandler('Please enter all field', 400));
 
   let user = await User.findOne({ email });
 
   if (user) return next(new ErrorHandler('User Already Exist', 409));
 
-  const fileUri = getDataUri(file);
-  const response = await uploader(fileUri.content, 'avatars');
+  //const fileUri = getDataUri(file);
+  //const response = await uploader(fileUri.content, 'avatars');
 
   user = await User.create({
     name,
     email,
     password,
     avatar: {
-      public_id: response.public_id,
-      url: response.secure_url,
+      public_id: 'response.public_id',
+      url: 'response.secure_url',
     },
   });
 
@@ -285,8 +285,6 @@ export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
 
   await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 
-  // Cancel Subscription
-
   await user.remove();
 
   res
@@ -300,13 +298,20 @@ export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
     });
 });
 
-// User.watch().on('change', async () => {
-//   const stats = await Stats.find({}).sort({ createdAt: 'desc' }).limit(1);
+User.watch().on('change', async () => {
+  const stats = await Stats.find({}).sort({ createdAt: 'desc' }).limit(1);
 
-//   const subscription = await User.find({ 'subscription.status': 'active' });
-//   stats[0].users = await User.countDocuments();
-//   stats[0].subscription = subscription.length;
-//   stats[0].createdAt = new Date(Date.now());
+  if (stats.length === 0)
+    return await Stats.create({
+      users: 0,
+      subscription: 0,
+      createdAt: new Date(Date.now()),
+    });
 
-//   await stats[0].save();
-// });
+  const subscription = await User.find({ 'subscription.status': 'active' });
+  stats[0].users = await User.countDocuments();
+  stats[0].subscription = subscription.length;
+  stats[0].createdAt = new Date(Date.now());
+
+  await stats[0].save();
+});
