@@ -30,11 +30,11 @@ const schema = new mongoose.Schema({
 
   subscription: {
     id: String,
-    status: {
-      type: String,
-      enum: ['active', 'inactive', 'canceled'],
-    },
+    status: String,
     plan: String,
+    customer: String,
+    current_period_start: Number,
+    current_period_end: Number,
   },
 
   avatar: {
