@@ -1,40 +1,36 @@
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
-import {catchAsyncError} from '../middlewares/catchAsyncError.js';
-import {User} from '../models/User.js';
-import ErrorHandler from '../utils/errorHandler.js';
+import { catchAsyncError } from "../middlewares/catchAsyncError.js";
+import { User } from "../models/User.js";
+import ErrorHandler from "../utils/errorHandler.js";
 
 export const buySubscription = catchAsyncError(async (req, res, next) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion : '2020-08-27',
+    apiVersion: "2020-08-27",
   });
 
-  const {plan} = req.body;
+  const { plan } = req.body;
 
   const user = await User.findById(req.user._id);
 
-  if (user.role === 'admin')
+  if (user.role === "admin")
     return next(new ErrorHandler("Admin can't buy subscription", 400));
 
   const session = await stripe.checkout.sessions.create({
-    payment_method_types : [ 'card' ],
-    line_items : [ {price : plan, quantity : 1} ],
-    mode : 'subscription',
-    subscription_data : {
-      trial_from_plan : true,
+    payment_method_types: ["card"],
+    line_items: [{ price: plan, quantity: 1 }],
+    mode: "subscription",
+    subscription_data: {
+      trial_from_plan: true,
     },
-    customer_email : req.user.email,
-    success_url : `${
-        process.env
-            .BACKEND_URL}/api/v1/payment/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url : `${
-        process.env
-            .BACKEND_URL}//api/v1/payment/checkout-cancel?session_id={CHECKOUT_SESSION_ID}`,
+    customer_email: req.user.email,
+    success_url: `${process.env.BACKEND_URL}/api/v1/payment/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.BACKEND_URL}//api/v1/payment/checkout-cancel?session_id={CHECKOUT_SESSION_ID}`,
   });
 
   res.status(201).json({
-    success : true,
-    url : session.url,
+    success: true,
+    url: session.url,
   });
 
   // user.subscription.id = subscription.id;
@@ -68,36 +64,38 @@ export const buySubscription = catchAsyncError(async (req, res, next) => {
   // });
 });
 
-export const checkoutSuccessSession =
-    catchAsyncError(async (req, res, next) => {
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion : '2020-08-27',
-      });
-
-      const {session_id} = req.query;
-
-      const session = await stripe.checkout.sessions.retrieve(session_id);
-
-      const subscriptionInfo =
-          await stripe.subscriptions.retrieve(session.subscription);
-
-      const user = await User.findOne({email : session.customer_email});
-
-      let userSubIfo = {
-        plan : subscriptionInfo.plan.id,
-        status : subscriptionInfo.status,
-        id : subscriptionInfo.id,
-        customer : subscriptionInfo.customer,
-        current_period_start : subscriptionInfo.current_period_start,
-        current_period_end : subscriptionInfo.current_period_end,
-      };
-
-      user.subscription = userSubIfo;
-
-      await user.save();
-
-      res.redirect(`${process.env.FRONTEND_URL}/me/subscribe/success`);
+export const checkoutSuccessSession = catchAsyncError(
+  async (req, res, next) => {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2020-08-27",
     });
+
+    const { session_id } = req.query;
+
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+
+    const subscriptionInfo = await stripe.subscriptions.retrieve(
+      session.subscription
+    );
+
+    const user = await User.findOne({ email: session.customer_email });
+
+    let userSubIfo = {
+      plan: subscriptionInfo.plan.id,
+      status: subscriptionInfo.status,
+      id: subscriptionInfo.id,
+      customer: subscriptionInfo.customer,
+      current_period_start: subscriptionInfo.current_period_start,
+      current_period_end: subscriptionInfo.current_period_end,
+    };
+
+    user.subscription = userSubIfo;
+
+    await user.save();
+
+    res.redirect(`${process.env.FRONTEND_URL}/me/subscribe/success`);
+  }
+);
 
 // export const paymentVerification = catchAsyncError(async (req, res, next)
 // => {
