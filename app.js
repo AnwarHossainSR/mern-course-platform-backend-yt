@@ -28,12 +28,12 @@ app.use(
 // Importing & Using Routes
 import course from './routes/courseRoutes.js';
 import other from './routes/otherRoutes.js';
-//import payment from './routes/paymentRoutes.js';
+import payment from './routes/paymentRoutes.js';
 import user from './routes/userRoutes.js';
 
 app.use('/api/v1', course);
 app.use('/api/v1', user);
-//app.use('/api/v1', payment);
+app.use('/api/v1', payment);
 app.use('/api/v1', other);
 
 export default app;
