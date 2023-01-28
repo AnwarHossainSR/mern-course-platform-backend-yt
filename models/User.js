@@ -29,12 +29,34 @@ const schema = new mongoose.Schema({
   },
 
   subscription: {
-    id: String,
-    status: String,
-    plan: String,
-    customer: String,
-    current_period_start: Number,
-    current_period_end: Number,
+    id: {
+      type: String,
+      required: false,
+    },
+    status: {
+      type: String,
+      required: false,
+    },
+    plan: {
+      type: String,
+      required: false,
+    },
+    plan_name: {
+      type: String,
+      required: false,
+    },
+    customer: {
+      type: String,
+      required: false,
+    },
+    current_period_start: {
+      type: Number,
+      required: false,
+    },
+    current_period_end: {
+      type: Number,
+      required: false,
+    },
   },
 
   avatar: {
