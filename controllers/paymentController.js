@@ -20,9 +20,6 @@ export const buySubscription = catchAsyncError(async (req, res, next) => {
     line_items: [{ price: plan, quantity: 1 }],
     billing_address_collection: 'auto',
     mode: 'subscription',
-    subscription_data: {
-      trial_period_days: 7,
-    },
     customer_email: req.user.email,
     success_url: `${process.env.BACKEND_URL}/api/v1/payment/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.BACKEND_URL}//api/v1/payment/checkout-cancel?session_id={CHECKOUT_SESSION_ID}`,
