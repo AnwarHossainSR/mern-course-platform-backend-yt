@@ -72,11 +72,8 @@ const schema = new mongoose.Schema({
 
   playlist: [
     {
-      course: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course',
-      },
-      poster: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Course',
     },
   ],
 
