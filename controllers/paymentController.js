@@ -1,34 +1,34 @@
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
-import {catchAsyncError} from '../middlewares/catchAsyncError.js';
-import {User} from '../models/User.js';
-import ErrorHandler from '../utils/errorHandler.js';
+import { catchAsyncError } from "../middlewares/catchAsyncError.js";
+import { User } from "../models/User.js";
+import ErrorHandler from "../utils/errorHandler.js";
 
 export const buySubscription = catchAsyncError(async (req, res, next) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion : '2020-08-27',
+    apiVersion: "2020-08-27",
   });
 
-  const {plan, plan_name} = req.body;
+  const { plan, plan_name } = req.body;
 
   const user = await User.findById(req.user._id);
 
-  if (user.role === 'admin')
-    return next(new ErrorHandler(
-        'You are an admin and you have access to all the features.', 400));
+  if (user.role === "admin")
+    return next(
+      new ErrorHandler(
+        "You are an admin and you have access to all the features.",
+        400
+      )
+    );
 
   const session = await stripe.checkout.sessions.create({
-    payment_method_types : [ 'card' ],
-    line_items : [ {price : plan, quantity : 1} ],
-    billing_address_collection : 'auto',
-    mode : 'subscription',
-    customer_email : req.user.email,
-    success_url : `${
-        process.env
-            .BACKEND_URL}/api/v1/payment/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url : `${
-        process.env
-            .BACKEND_URL}//api/v1/payment/checkout-cancel?session_id={CHECKOUT_SESSION_ID}`,
+    payment_method_types: ["card"],
+    line_items: [{ price: plan, quantity: 1 }],
+    billing_address_collection: "auto",
+    mode: "subscription",
+    customer_email: req.user.email,
+    success_url: `${process.env.BACKEND_URL}/api/v1/payment/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.BACKEND_URL}//api/v1/payment/checkout-cancel?session_id={CHECKOUT_SESSION_ID}`,
   });
 
   user.subscription.plan_name = plan_name;
@@ -36,43 +36,45 @@ export const buySubscription = catchAsyncError(async (req, res, next) => {
   await user.save();
 
   res.status(201).json({
-    success : true,
-    url : session.url,
+    success: true,
+    url: session.url,
   });
 });
 
-export const checkoutSuccessSession =
-    catchAsyncError(async (req, res, next) => {
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion : '2020-08-27',
-      });
-
-      const {session_id} = req.query;
-
-      const session = await stripe.checkout.sessions.retrieve(session_id);
-
-      const subscriptionInfo =
-          await stripe.subscriptions.retrieve(session.subscription);
-
-      const user = await User.findOne({email : session.customer_email});
-
-      let userSubIfo = {
-        plan_name : user.subscription.plan_name,
-        plan : subscriptionInfo.plan.id,
-        status : subscriptionInfo.status,
-        // status: 'active',
-        id : subscriptionInfo.id,
-        customer : subscriptionInfo.customer,
-        current_period_start : subscriptionInfo.current_period_start,
-        current_period_end : subscriptionInfo.current_period_end,
-      };
-
-      user.subscription = userSubIfo;
-
-      await user.save();
-
-      res.redirect(`${process.env.FRONTEND_URL}/me/subscribe/success`);
+export const checkoutSuccessSession = catchAsyncError(
+  async (req, res, next) => {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2020-08-27",
     });
+
+    const { session_id } = req.query;
+
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+
+    const subscriptionInfo = await stripe.subscriptions.retrieve(
+      session.subscription
+    );
+
+    const user = await User.findOne({ email: session.customer_email });
+
+    let userSubIfo = {
+      plan_name: user.subscription.plan_name,
+      plan: subscriptionInfo.plan.id,
+      status: subscriptionInfo.status,
+      // status: 'active',
+      id: subscriptionInfo.id,
+      customer: subscriptionInfo.customer,
+      current_period_start: subscriptionInfo.current_period_start,
+      current_period_end: subscriptionInfo.current_period_end,
+    };
+
+    user.subscription = userSubIfo;
+
+    await user.save();
+
+    res.redirect(`${process.env.FRONTEND_URL}/me/subscribe/success`);
+  }
+);
 
 export const checkoutCancelSession = catchAsyncError(async (req, res, next) => {
   res.redirect(`${process.env.FRONTEND_URL}/me/subscribe/fail`);
@@ -80,25 +82,26 @@ export const checkoutCancelSession = catchAsyncError(async (req, res, next) => {
 
 export const cancelSubscription = catchAsyncError(async (req, res, next) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion : '2020-08-27',
+    apiVersion: "2020-08-27",
   });
 
   const user = await User.findById(req.user._id);
 
-  const subscription =
-      await stripe.subscriptions.retrieve(user.subscription.id);
+  const subscription = await stripe.subscriptions.retrieve(
+    user.subscription.id
+  );
 
-  if (subscription.status === 'active') {
+  if (subscription.status === "active") {
     await stripe.subscriptions.del(user.subscription.id);
   }
 
-  user.subscription.status = 'canceled';
+  user.subscription.status = "canceled";
 
   await user.save();
 
   res.status(200).json({
-    success : true,
-    message : 'Subscription canceled',
+    success: true,
+    message: "Subscription canceled",
   });
 });
 
