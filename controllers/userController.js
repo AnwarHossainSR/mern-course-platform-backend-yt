@@ -44,7 +44,9 @@ export const login = catchAsyncError(async (req, res, next) => {
   if (!email || !password)
     return next(new ErrorHandler('Please enter all field', 400));
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email })
+    .select('+password')
+    .populate('playlist');
 
   if (!user) return next(new ErrorHandler('Incorrect Email or Password', 401));
 
@@ -222,7 +224,7 @@ export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
   if (!course) return next(new ErrorHandler('Invalid Course Id', 404));
 
   const newPlaylist = user.playlist.filter((item) => {
-    if (item.course.toString() !== course._id.toString()) return item;
+    if (item.toString() !== course._id.toString()) return item;
   });
 
   user.playlist = newPlaylist;
