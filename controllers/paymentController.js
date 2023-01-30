@@ -13,7 +13,12 @@ export const buySubscription = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user._id);
 
   if (user.role === 'admin')
-    return next(new ErrorHandler("Admin can't buy subscription", 400));
+    return next(
+      new ErrorHandler(
+        'You are an admin and you have access to all the features.',
+        400
+      )
+    );
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
