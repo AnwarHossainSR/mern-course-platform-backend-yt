@@ -17,3 +17,11 @@ export const uploader = async (path, folder) => {
 export const destroy = async (public_id) => {
   return await cloudinary.v2.uploader.destroy(public_id);
 };
+
+export const uploadVideo = async (path, folder) => {
+  return await cloudinary.v2.uploader.upload(path, {
+    folder: folder,
+    resource_type: "video",
+    timeout: 600000,
+  });
+};
