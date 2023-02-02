@@ -6,9 +6,10 @@ import { cloudinaryConfig } from './utils/cloudinaryConfig.js';
 
 connectDB();
 cloudinaryConfig();
-
-nodeCron.schedule('0 0 0 5 * *', async () => {
+//'0 0 0 1 * *' - every first day of month
+nodeCron.schedule('0 0 0 1 * *', async () => {
   try {
+    console.log('Cron job is running');
     await Stats.create({});
   } catch (error) {
     console.log(error);
