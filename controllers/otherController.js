@@ -22,8 +22,8 @@ export const contact = catchAsyncError(async (req, res, next) => {
 });
 
 export const courseRequest = catchAsyncError(async (req, res, next) => {
-  const { name, email, course } = req.body;
-  if (!name || !email || !course)
+  const { name, email, course, description } = req.body;
+  if (!name || !email || !course || !description)
     return next(new ErrorHandler('All fields are mandatory', 400));
 
   const to = process.env.MY_MAIL;
