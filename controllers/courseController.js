@@ -20,7 +20,10 @@ export const getAllCourses = catchAsyncError(async (req, res, next) => {
       $regex: category,
       $options: 'i',
     },
-  }).select('-lectures');
+  })
+    .select('-lectures')
+    .populate('createdBy', 'name');
+
   res.status(200).json({
     success: true,
     courses,
